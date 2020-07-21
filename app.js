@@ -18,7 +18,7 @@ app.listen(port, () => {
 
 // ข้อความสำหรับ path หน้าแรกของ express เรา (localhost:5000/)
 app.get('/', (req, res) => {
-  res.status(200).send(myFn.sayHello());
+  res.status(200).send('hello');
 });
 
 app.get('/students', (req, res) => {
