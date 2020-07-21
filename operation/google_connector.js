@@ -5,9 +5,9 @@ const { Observable, Subject } = require('rxjs');
 const { switchMap } = require('rxjs/operators');
 
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
-const TOKEN_PATH = 'token.json';
+const TOKEN_PATH = 'google_token/token.json';
 const CREDENTIALS_JSON =
-  'client_secret_581930412554-khdp5ovhbcpahm9fm9552mud69q9jb0l.apps.googleusercontent.com.json';
+  'credential/client_secret_581930412554-khdp5ovhbcpahm9fm9552mud69q9jb0l.apps.googleusercontent.com.json';
 
 const data = new Subject();
 const data$ = getAuth().pipe(switchMap(listMajors));

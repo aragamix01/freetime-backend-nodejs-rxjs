@@ -2,10 +2,7 @@
 var express = require('express');
 var cors = require('cors');
 var myFn = require('./fn');
-var googleSheet = require('./google');
-const { range } = require('rxjs');
-const { map, filter, switchMap } = require('rxjs/operators');
-const { content } = require('googleapis/build/src/apis/content');
+var googleSheet = require('./operation/google_connector');
 
 // สร้าง express เพื่อทำ path
 var app = express();
