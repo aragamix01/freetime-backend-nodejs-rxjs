@@ -1,7 +1,7 @@
 const fs = require('fs');
 const readline = require('readline');
 const { google } = require('googleapis');
-const { Observable, Subject } = require('rxjs');
+const { Observable, zip } = require('rxjs');
 const { switchMap } = require('rxjs/operators');
 
 const SCOPES = ['https://www.googleapis.com/auth/spreadsheets'];
@@ -9,25 +9,16 @@ const TOKEN_PATH = 'google_token/token.json';
 const CREDENTIALS_JSON =
   'credential/client_secret_581930412554-khdp5ovhbcpahm9fm9552mud69q9jb0l.apps.googleusercontent.com.json';
 
-const data = new Subject();
-const data$ = getAuth().pipe(switchMap(listMajors));
-const sheetId = '1o8G4tBCicfVgqMp2Y6tWV5j8GOXfsgOk4pzg4Eo_VLQ';
-
-const valueWrite = new Subject();
-// const valueWrite$ = getAuth().pipe(switchMap(writeValues));
-const valueWrite$ = valueWrite.pipe(switchMap(getAuth()));
-valueWrite$.subscribe(console.log);
-
 function getAuth() {
   return getCredentials().pipe(switchMap((rs) => authorize(rs)));
 }
 
 function getAuthOperator() {
   return (prev) => {
-    new Observable((observ) => {
-      const sub = prev.subscribe({
-        next: observ.next()
-      })
+    return new Observable((observ) => {
+      zip(prev, getAuth()).subscribe({
+        next: (rs) => observ.next(rs),
+      });
     });
   };
 }
@@ -36,7 +27,6 @@ function getCredentials() {
   return new Observable((observ) => {
     return fs.readFile(CREDENTIALS_JSON, (err, content) => {
       observ.next(content);
-      observ.complete();
     });
   });
 }
@@ -55,7 +45,6 @@ function authorize(credentials) {
       if (err) return getNewToken(oAuth2Client);
       oAuth2Client.setCredentials(JSON.parse(token));
       observ.next(oAuth2Client);
-      observ.complete();
     });
   });
 }
@@ -86,47 +75,56 @@ function getNewToken(oAuth2Client) {
   });
 }
 
-function listMajors(auth) {
-  const sheets = google.sheets({ version: 'v4', auth });
-  return new Observable((observ) => {
-    sheets.spreadsheets.values.get(
-      {
-        spreadsheetId: sheetId,
-        range: 'A2:B1000',
-      },
-      (err, res) => {
-        const rows = res.data.values;
-        data.next(rows);
-        observ.next(rows);
-        observ.complete();
-      }
-    );
-  });
-}
+// function listMajors(auth) {
+//   const sheets = google.sheets({ version: 'v4', auth });
+//   return new Observable((observ) => {
+//     sheets.spreadsheets.values.get(
+//       {
+//         spreadsheetId: sheetId,
+//         range: 'A2:D1000',
+//       },
+//       (err, res) => {
+//         const rows = res.data.values;
+//         data.next(rows);
+//         observ.next(rows);
+//         observ.complete();
+//       }
+//     );
+//   });
+// }
 
-function writeValues(auth) {
-  const sheets = google.sheets({ version: 'v4', auth });
-  return new Observable((observ) => {
-    sheets.spreadsheets.values.append(
-      {
-        spreadsheetId: sheetId,
-        range: 'A1',
-        valueInputOption: 'RAW',
-        requestBody: {
-          majorDimension: 'COLUMNS',
-          range: 'A1',
-          values: [['f'], [6]],
-        },
-      },
-      () => {
-        observ.next(true);
-        observ.complete();
-      }
-    );
-  });
-}
+// function writeValuesOperator() {
+//   return (prev) =>
+//     new Observable((observ) => {
+//       prev.subscribe((paramList) => {
+//         const val = paramList[0];
+//         const auth = paramList[1];
+//         const sheets = google.sheets({ version: 'v4', auth });
+//         sheets.spreadsheets.values.append(
+//           {
+//             spreadsheetId: sheetId,
+//             range: 'A1',
+//             valueInputOption: 'RAW',
+//             requestBody: {
+//               majorDimension: 'COLUMNS',
+//               range: 'A1',
+//               values: [
+//                 [val.storeName],
+//                 [val.suggestMenu],
+//                 [val.worstMenu],
+//                 [val.score],
+//               ],
+//             },
+//           },
+//           () => {
+//             observ.next(true);
+//             observ.complete(true);
+//           }
+//         );
+//       });
+//     });
+// }
 
-module.exports.data$ = data$;
 module.exports.getAuth = getAuth;
-module.exports.listMajors = listMajors;
-module.exports.valueWrite = valueWrite;
+module.exports.getAuthOperator = getAuthOperator;
+
