@@ -75,56 +75,6 @@ function getNewToken(oAuth2Client) {
   });
 }
 
-// function listMajors(auth) {
-//   const sheets = google.sheets({ version: 'v4', auth });
-//   return new Observable((observ) => {
-//     sheets.spreadsheets.values.get(
-//       {
-//         spreadsheetId: sheetId,
-//         range: 'A2:D1000',
-//       },
-//       (err, res) => {
-//         const rows = res.data.values;
-//         data.next(rows);
-//         observ.next(rows);
-//         observ.complete();
-//       }
-//     );
-//   });
-// }
-
-// function writeValuesOperator() {
-//   return (prev) =>
-//     new Observable((observ) => {
-//       prev.subscribe((paramList) => {
-//         const val = paramList[0];
-//         const auth = paramList[1];
-//         const sheets = google.sheets({ version: 'v4', auth });
-//         sheets.spreadsheets.values.append(
-//           {
-//             spreadsheetId: sheetId,
-//             range: 'A1',
-//             valueInputOption: 'RAW',
-//             requestBody: {
-//               majorDimension: 'COLUMNS',
-//               range: 'A1',
-//               values: [
-//                 [val.storeName],
-//                 [val.suggestMenu],
-//                 [val.worstMenu],
-//                 [val.score],
-//               ],
-//             },
-//           },
-//           () => {
-//             observ.next(true);
-//             observ.complete(true);
-//           }
-//         );
-//       });
-//     });
-// }
-
 module.exports.getAuth = getAuth;
 module.exports.getAuthOperator = getAuthOperator;
 
