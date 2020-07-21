@@ -1,0 +1,6 @@
+nodeapi:
+  image: node-rest-api:latest
+  restart: always
+  container_name: nodeapi
+  ports: 
+    - "5000:5000"
